@@ -1,12 +1,19 @@
 import { ethers, upgrades } from "hardhat";
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 async function main() {
   const Mania = await ethers.getContractFactory("ManiaUpgradeableV1");
   // const mania = await Mania.deploy();
 
-  const mania = await upgrades.deployProxy(Mania, {
-    initializer: "initialize",
-  });
+  const mania = await upgrades.deployProxy(
+    Mania,
+    [process.env.ADDRESS_OWNER],
+    {
+      initializer: "initialize",
+    },
+  );
 
   await mania.deployed();
 
