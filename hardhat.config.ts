@@ -4,7 +4,7 @@ import "@openzeppelin/hardhat-upgrades";
 
 const config: HardhatUserConfig = {
   solidity: {
-    version: "0.8.18",
+    version: "0.8.4",
     settings: {
       optimizer: {
         enabled: true,
@@ -24,11 +24,11 @@ const config: HardhatUserConfig = {
     //   from: 'address',
     //   accounts: ['private_key'],
     // },
-    bsc: {
-      url: 'https://bsc-dataseed.binance.org',
-      from: 'address',
-      accounts: ['private_key'],
-    },
+    // bsc: {
+      // url: 'https://bsc-dataseed.binance.org',
+      // from: 'address',
+      // accounts: ['private_key'],
+    // },
     bsctestnet: {
       url: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
       from: '0x03fE49b9a4a24a49f80A7B2d02D94549690B5857',
@@ -46,7 +46,7 @@ const config: HardhatUserConfig = {
     }
   },
   etherscan: {
-    apiKey: 'key',
+    apiKey: 'S97DHUAJATXMSIC9WR9G67IAGPSPJ7KUSD',
   }
 };
 

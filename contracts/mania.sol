@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.18;
+pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
-contract ManiaUpgradeableV1 is ERC20PausableUpgradeable, OwnableUpgradeable {
+contract ManiaUpgradeableV1 is ERC20PausableUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     // Token name
     string private constant _NAME = "ScapesMania";
     // Token symbol
@@ -14,21 +15,30 @@ contract ManiaUpgradeableV1 is ERC20PausableUpgradeable, OwnableUpgradeable {
     // `maxTotalSupply` - maximum count of contract tokens
     uint256 private _maxTotalSupply;
 
+    // Mapping for accounting blacklisted addresses
+    mapping(address => bool) private _blacklistedAddresses;
+
+    /**
+     * @dev Emitted when `account` added to blacklist.
+     */
+    event AddToBlacklist(address indexed account);
+    /**
+     * @dev Emitted when `account` removed from blacklist.
+     */
+    event RemoveFromBlacklist(address indexed account);
+
     /**
      * @dev Initializes the contract by setting `maxTotalSupply`.
      *
      * Requirements:
      * - `maxTotalSupply` cannot be 0.
      */
-    function initialize(address account_) initializer external {
+    function initialize() initializer external {
         __ERC20_init(_NAME, _SYMBOL);
         __Ownable_init();
         __ReentrancyGuard_init();
 
         _maxTotalSupply = 4000000000000000000000000000;
-
-        require(account_ != address(0), "Invalid address for minitng");
-        _mint(account_, _maxTotalSupply);
     }
 
     /**
@@ -46,6 +56,13 @@ contract ManiaUpgradeableV1 is ERC20PausableUpgradeable, OwnableUpgradeable {
     }
 
     /**
+     * @dev Checks if 'account' is blacklisted.
+     */
+    function isBlacklistedAddress(address account_) external view returns (bool) {
+        return _blacklistedAddresses[account_];
+    }
+
+    /**
      * @dev Overridden `transfer` method.
      *
      * Requirements:
@@ -58,6 +75,8 @@ contract ManiaUpgradeableV1 is ERC20PausableUpgradeable, OwnableUpgradeable {
     )
         public
         override
+        notBlacklistedAddress(_msgSender())
+        notBlacklistedAddress(to_)
         returns (bool)
     {
         return super.transfer(to_, amount_);
@@ -78,9 +97,56 @@ contract ManiaUpgradeableV1 is ERC20PausableUpgradeable, OwnableUpgradeable {
     )
         public
         override
+        notBlacklistedAddress(_msgSender())
+        notBlacklistedAddress(from_)
+        notBlacklistedAddress(to_)
         returns (bool)
     {
         return super.transferFrom(from_, to_, amount_);
+    }
+
+    /**
+     * @dev Add `account` to blacklist.
+     *
+     * Requirements:
+     * - must be called by owner account.
+     */
+    function addToBlacklist(address account_) external onlyOwner {
+        _blacklistedAddresses[account_] = true;
+        emit AddToBlacklist(account_);
+    }
+
+    /**
+     * @dev Remove `account` from blacklist.
+     *
+     * Requirements:
+     * - must be called by owner account.
+     */
+    function removeFromBlacklist(address account_) external onlyOwner {
+        _blacklistedAddresses[account_] = false;
+        emit RemoveFromBlacklist(account_);
+    }
+
+    /**
+     * @dev Emission of tokens to the desired `account`.
+     *
+     * Requirements:
+     * - must be called by owner account,
+     * - `account` cannot be the zero address,
+     * - not exceeding the `maxTotalSupply` limit.
+     */
+    function mintAmount(
+        address account_,
+        uint256 amount_
+    )
+        external
+        onlyOwner
+        nonReentrant
+        notBlacklistedAddress(account_)
+    {
+        require(account_ != address(0), "Invalid address for minitng");
+        _mint(account_, amount_);
+        require(totalSupply() <= _maxTotalSupply, "Max total supply limit reached");
     }
 
     /**
@@ -101,5 +167,13 @@ contract ManiaUpgradeableV1 is ERC20PausableUpgradeable, OwnableUpgradeable {
      */
     function unpauseContract() external onlyOwner {
         _unpause();
+    }
+
+    /**
+     * @dev Throws if called by blacklisted `account`.
+     */
+    modifier notBlacklistedAddress(address account_) {
+        require(!_blacklistedAddresses[account_], "CHIM: Address is blacklisted");
+        _;
     }
 }
