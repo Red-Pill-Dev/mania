@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.4;
+pragma solidity 0.8.18;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
-contract ManiaUpgradeableV2 is ERC20PausableUpgradeable, OwnableUpgradeable {
+contract ManiaUpgradeableV2 is ERC20PausableUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     // Token name
-    string private _NAME;
+     string private constant _NAME = "ScapesMania";
     // Token symbol
-    string private _SYMBOL;
+    string private constant _SYMBOL = "MANIA";
 
     // `maxTotalSupply` - maximum count of contract tokens
     uint256 private _maxTotalSupply;

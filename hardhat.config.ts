@@ -19,16 +19,6 @@ const config: HardhatUserConfig = {
     artifacts: "./artifacts"
   },
   networks: {
-    // mainnet: {
-    //   url: 'https://mainnet.infura.io/v3/8a19bdc6d7b74c488b77b3e346bb6615',
-    //   from: 'address',
-    //   accounts: ['private_key'],
-    // },
-    bsc: {
-      url: 'https://bsc-dataseed.binance.org',
-      from: 'address',
-      accounts: ['private_key'],
-    },
     bsctestnet: {
       url: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
       from: '0x03fE49b9a4a24a49f80A7B2d02D94549690B5857',
